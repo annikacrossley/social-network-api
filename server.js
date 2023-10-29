@@ -10,50 +10,69 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
 // USER ROUTES
-// User.create([
-//     {
-//         username: 'bananika',
-//         email: 'bananika@mail.com'
-//     },
-//     {
-//         username: 'zachary',
-//         email: 'zach@mail.com'
-//     },
-//     {
-//         username: 'sukiwuki',
-//         email: 'suki@mail.com'
-//     },
-//     {
-//         username: 'teague',
-//         email: 'teague@mail.com'
+// Get all users
+app.get('api/users', async (req, res) => {
+    try {
+        const result = await User.find({});
+        res.status(200).json(result)
+    } catch (err) {
+        console.log('Something went wrong.')
+        res.status(500).json({message: 'something went wrong'})
+    }
+})
+
+// Get a single user by its _id
+// app.get('api/users', async (req, res) => {
+//     try {
+
+//     } catch (err) {
+//         console.log('Something went wrong.')
+//         res.status(500).json({message: 'something went wrong'})
 //     }
-// ]).then(
-//     savedUser => console.log(savedUser)
-// )
-
-// User.updateOne({ username: 'zachary'}, {email: 'zachary@mail.com'})
-//     .then(updatedItem => console.log(updatedItem))
-
-// User.deleteOne ({username: 'teague'})
-//     .then(result => console.log(result))
-
-
-// THOUGHT ROUTES
-// Thought.create({
-    // username: ,
-    // email:
 // })
 
-// Thought.updateOne({
+// Post a new user 
+app.post('api/users', async (req, res) => {
+    const newUser = new User({ username: req.params.user }, {email: req.params.user});
+    newUser.save();
+    if (newUser) {
+      res.status(200).json(newUser);
+    } else {
+      console.log('Something went wrong.');
+      res.status(500).json({ message: 'something went wrong' });
+    }
+  });
 
-// })
+// Put to update a user by its _id
+app.post('api/users', async (req, res) => {
+    try {
+        const result = await User
+          .findOneAndUpdate(
+            { username: 'bananika' },
+            { username: req.params.user },
+            { new: true }
+          );
+        res.status(200).json(result);
+        console.log(`Updated: ${result}`);
+      } catch (err) {
+        console.log('Something went wrong.');
+        res.status(500).json({ message: 'something went wrong' });
+      }
+    });
 
-// Thought.delete({
+// Delete to remove a user by its _id
+app.delete('/api/users', async (req, res) => {
+    try {
+      const result = await User.findOneAndDelete({ username: req.params.user });
+      res.status(200).json(result);
+      console.log(`Deleted ${result}`);
+    } catch (err) {
+      console.log('Something went wrong.');
+      res.status(500).json({ message: 'something went wrong' });
+    }
+  });
 
-// })
 
-// REACTION ROUTES
-// FRIEND LIST ROUTES
 
 db.once('open', () => {
     app.listen(PORT, () => {
