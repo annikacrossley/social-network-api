@@ -7,16 +7,16 @@ const thoughtSchema = new Schema({
         minLength: 1,
         maxLength: 280
     },
-    createdAt: {
-        type: Date,
-        createdAt: true,
-        updatedAt: false,
-        //getter method to format timestamp on query
-    },
-    username: {
-        type: String,
-        required: true
-    },
+    // createdAt: {
+    //     type: Date,
+    //     createdAt: true,
+    //     updatedAt: false,
+    //     //getter method to format timestamp on query
+    // },
+    // username: {
+    //     type: String,
+    //     required: true
+    // },
     // reactions: Array
 })
 
