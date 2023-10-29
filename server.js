@@ -1,6 +1,13 @@
-require('./config/connection')
+const express = require('express')
+const db = require('./config/connection')
 
 const { User, Thought } = require('./models')
+
+const PORT = process.env.PORT || 3001;
+const app = express()
+
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 
 // USER ROUTES
 // User.create([
@@ -24,11 +31,11 @@ const { User, Thought } = require('./models')
 //     savedUser => console.log(savedUser)
 // )
 
-User.updateOne({ username: 'zachary'}, {email: 'zachary@mail.com'})
-    .then(updatedItem => console.log(updatedItem))
+// User.updateOne({ username: 'zachary'}, {email: 'zachary@mail.com'})
+//     .then(updatedItem => console.log(updatedItem))
 
-User.deleteOne ({username: 'teague'})
-    .then(result => console.log(result))
+// User.deleteOne ({username: 'teague'})
+//     .then(result => console.log(result))
 
 
 // THOUGHT ROUTES
@@ -47,3 +54,10 @@ User.deleteOne ({username: 'teague'})
 
 // REACTION ROUTES
 // FRIEND LIST ROUTES
+
+db.once('open', () => {
+    app.listen(PORT, () => {
+      console.log(`API server running on port ${PORT}!`);
+    });
+  });
+  
