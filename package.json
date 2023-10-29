@@ -1,7 +1,7 @@
 {
   "name": "social-network-api",
   "version": "1.0.0",
-  "description": "AS A social media startup <br>\r I WANT an API for my social network that uses a NoSQL database <br>\r SO THAT my website can handle large amounts of unstructured data",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,6 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mongodb": "^6.2.0"
+    "mongoose": "^7.6.3"
   }
 }
