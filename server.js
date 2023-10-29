@@ -11,7 +11,7 @@ app.use(express.json())
 
 // USER ROUTES
 // Get all users
-app.get('api/users', async (req, res) => {
+app.get('/api/users', async (req, res) => {
     try {
         const result = await User.find({});
         res.status(200).json(result)
@@ -22,18 +22,22 @@ app.get('api/users', async (req, res) => {
 })
 
 // Get a single user by its _id
-// app.get('api/users', async (req, res) => {
-//     try {
-
-//     } catch (err) {
-//         console.log('Something went wrong.')
-//         res.status(500).json({message: 'something went wrong'})
-//     }
-// })
+app.get('/api/users', async (req, res) => {
+    try {
+        const result = await User.findOne({_id: req.params.user})
+        res.status(200).json(result)
+    } catch (err) {
+        console.log('Something went wrong.')
+        res.status(500).json({message: 'something went wrong'})
+    }
+})
 
 // Post a new user 
-app.post('api/users', async (req, res) => {
-    const newUser = new User({ username: req.params.user }, {email: req.params.user});
+app.post('/api/users', (req, res) => {
+    const newUser = new User({
+        username: req.params.user,
+        email: req.params.user
+    });
     newUser.save();
     if (newUser) {
       res.status(200).json(newUser);
@@ -44,11 +48,11 @@ app.post('api/users', async (req, res) => {
   });
 
 // Put to update a user by its _id
-app.post('api/users', async (req, res) => {
+app.put('/api/users', async (req, res) => {
     try {
         const result = await User
           .findOneAndUpdate(
-            { username: 'bananika' },
+            { _id: req.params.user },
             { username: req.params.user },
             { new: true }
           );
@@ -72,7 +76,73 @@ app.delete('/api/users', async (req, res) => {
     }
   });
 
+// THOUGHT ROUTES
+// Get all thoughts
+app.get('/api/thoughts', async (req, res) => {
+    try {
+        const result = await Thought.find({});
+        res.status(200).json(result)
+    } catch (err) {
+        console.log('Something went wrong.')
+        res.status(500).json({message: 'something went wrong'})
+    }
+})
 
+// Get a single thought by its _id
+app.get('/api/thoughts', async (req, res) => {
+    try {
+        const result = await Thought.findOne({_id: req.params.thought})
+        res.status(200).json(result)
+    } catch (err) {
+        console.log('Something went wrong.')
+        res.status(500).json({message: 'something went wrong'})
+    }
+})
+
+// Post a new thought 
+app.post('/api/thoughts', (req, res) => {
+    const newThought = new Thought({
+        thoughtText: req.params.thought,
+        username: req.params.thought,
+        userId: req.params.thought
+    });
+    newThought.save();
+    if (newThought) {
+      res.status(200).json(newThought);
+    } else {
+      console.log('Something went wrong.');
+      res.status(500).json({ message: 'something went wrong' });
+    }
+  });
+
+// Put to update a thought by its _id
+app.put('/api/thoughts', async (req, res) => {
+    try {
+        const result = await Thought
+          .findOneAndUpdate(
+            { _id: req.params.thought },
+            { thoughtText: req.params.user },
+            { new: true }
+          );
+        res.status(200).json(result);
+        console.log(`Updated: ${result}`);
+      } catch (err) {
+        console.log('Something went wrong.');
+        res.status(500).json({ message: 'something went wrong' });
+      }
+    });
+
+// Delete to remove a thought by its _id
+app.delete('/api/thoughts', async (req, res) => {
+    try {
+      const result = await Thought.findOneAndDelete({ _id: req.params.user });
+      res.status(200).json(result);
+      console.log(`Deleted ${result}`);
+    } catch (err) {
+      console.log('Something went wrong.');
+      res.status(500).json({ message: 'something went wrong' });
+    }
+  });
 
 db.once('open', () => {
     app.listen(PORT, () => {
