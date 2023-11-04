@@ -11,12 +11,30 @@ const userSchema = new Schema({
         type: String,
         required: true,
         unique: true,
-        validate: {
-            validator: () => Promise.resolve(false),
-            message: 'Email validation failed.'
-        }
+        // validate: {
+        //     validator: () => Promise.resolve(false),
+        //     message: 'Email validation failed.'
+        // }
     },
-})
+    friends: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
+        },
+      ],
+    thoughts: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'Thought',
+        },
+      ],  
+},
+{
+    toJSON: {
+      virtuals: true,
+    },
+    id: false,
+  })
 
 const User = model('User', userSchema)
 

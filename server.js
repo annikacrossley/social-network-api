@@ -13,8 +13,8 @@ app.use(express.json())
 // Get all users
 app.get('/api/users', async (req, res) => {
     try {
-        const result = await User.find({});
-        res.status(200).json(result)
+      const users = await User.find();
+        res.status(200).json(users)
     } catch (err) {
         console.log('Something went wrong.')
         res.status(500).json({message: 'something went wrong'})
@@ -22,9 +22,13 @@ app.get('/api/users', async (req, res) => {
 })
 
 // Get a single user by its _id
-app.get('/api/users', async (req, res) => {
+app.get('/api/:userId', async (req, res) => {
     try {
         const result = await User.findOne({_id: req.params.user})
+        .select('-__v')
+        .populate('friends')
+        .populate('thoughts');
+
         res.status(200).json(result)
     } catch (err) {
         console.log('Something went wrong.')
@@ -33,18 +37,13 @@ app.get('/api/users', async (req, res) => {
 })
 
 // Post a new user 
-app.post('/api/users', (req, res) => {
-    const newUser = new User({
-        username: req.params.user,
-        email: req.params.user
-    });
-    newUser.save();
-    if (newUser) {
-      res.status(200).json(newUser);
-    } else {
-      console.log('Something went wrong.');
-      res.status(500).json({ message: 'something went wrong' });
-    }
+app.post('/api/users', async (req, res) => {
+  try {
+    const user = await User.create(req.body);
+    res.json(user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
   });
 
 // Put to update a user by its _id
@@ -66,15 +65,60 @@ app.put('/api/users', async (req, res) => {
 
 // Delete to remove a user by its _id
 app.delete('/api/users', async (req, res) => {
-    try {
-      const result = await User.findOneAndDelete({ username: req.params.user });
-      res.status(200).json(result);
-      console.log(`Deleted ${result}`);
-    } catch (err) {
-      console.log('Something went wrong.');
-      res.status(500).json({ message: 'something went wrong' });
+  try {
+    const user = await User.findOneAndRemove({ _id: req.params.userId });
+
+    if (!user) {
+      return res.status(404).json({ message: 'No such user exists' });
+    } 
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }}
+  );
+
+//Add a friend 
+app.post('/api/:userId/friends/:friendId', async (req, res) => {
+  try {
+    const userData = await User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $addToSet: { friends: req.body } },
+      { new: true }
+    );
+
+    if (!userData) {
+      return res
+        .status(404)
+        .json({ message: 'No user found with that ID' });
     }
-  });
+
+    res.json(userData);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+})
+
+//remove a friend
+app.delete('/api/:userId/friends/:friendId', async (req, res) => {
+  try {
+    const userData = await User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $pull: { friends: req.params.friendId } },
+      { new: true }
+    );
+
+    if (!userData) {
+      return res
+        .status(404)
+        .json({ message: 'No user found with that ID' });
+    }
+
+    res.json(userData);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+})
+
 
 // THOUGHT ROUTES
 // Get all thoughts
@@ -100,19 +144,23 @@ app.get('/api/thoughts', async (req, res) => {
 })
 
 // Post a new thought 
-app.post('/api/thoughts', (req, res) => {
-    const newThought = new Thought({
-        thoughtText: req.params.thought,
-        username: req.params.thought,
-        userId: req.params.thought
-    });
-    newThought.save();
-    if (newThought) {
-      res.status(200).json(newThought);
-    } else {
-      console.log('Something went wrong.');
-      res.status(500).json({ message: 'something went wrong' });
+app.post('/api/thoughts', async (req, res) => {
+    try {const newThought = await Thought.create(req.body);
+
+    const userData = await User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $push: {thoughts: newThought._id} },
+      { new: true }
+    )
+    if (!userData) {
+      return res.status(404).json({ message: 'Thought created but no user with this id!' });
     }
+
+    res.json({ message: 'Thought successfully created!' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
   });
 
 // Put to update a thought by its _id
@@ -149,4 +197,5 @@ db.once('open', () => {
       console.log(`API server running on port ${PORT}!`);
     });
   });
-  
+
+module.exports = db;
